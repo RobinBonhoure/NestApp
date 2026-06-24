@@ -20,6 +20,7 @@ async function bootstrap() {
     .setTitle('Profiles API')
     .setDescription('API for managing profiles')
     .setVersion('1.0')
+    .addBearerAuth()
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

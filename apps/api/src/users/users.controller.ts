@@ -1,9 +1,8 @@
 import {
   Controller,
   Get,
-  Post,
-  Body,
   Put,
+  Body,
   Param,
   ParseUUIDPipe,
   UseGuards,
@@ -13,17 +12,15 @@ import {
 } from '@nestjs/common';
 import type { UUID } from 'crypto';
 import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import {
   ApiOperation,
   ApiNotFoundResponse,
   ApiOkResponse,
-  ApiBadRequestResponse,
   ApiNoContentResponse,
-  ApiCreatedResponse,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
-import { UsersGuard } from './users.guard';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('users')
 export class UsersController {
@@ -44,18 +41,10 @@ export class UsersController {
     return this.usersService.findById(id);
   }
 
-  // POST /users
-  @Post()
-  @ApiOperation({ summary: 'Create a new user' })
-  @ApiCreatedResponse({ description: 'User created' })
-  @ApiBadRequestResponse({ description: 'Invalid input' })
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
-  }
-
   // PUT /users/:id
   @Put(':id')
-  @UseGuards(UsersGuard)
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Update an existing user' })
   @ApiOkResponse({ description: 'User updated' })
   @ApiNotFoundResponse({ description: 'User not found' })
@@ -68,7 +57,8 @@ export class UsersController {
 
   // DELETE /users/:id
   @Delete(':id')
-  @UseGuards(UsersGuard)
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete a user' })
   @ApiNoContentResponse({ description: 'User deleted' })
   @ApiNotFoundResponse({ description: 'User not found' })
