@@ -28,12 +28,18 @@ export class UsersController {
 
   // GET /users
   @Get()
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get all users' })
+  @ApiOkResponse({ description: 'List of users' })
   findAll() {
     return this.usersService.findAll();
   }
 
   // GET /users/:id
   @Get(':id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get user by ID' })
   @ApiOkResponse({ description: 'User found' })
   @ApiNotFoundResponse({ description: 'User not found' })
