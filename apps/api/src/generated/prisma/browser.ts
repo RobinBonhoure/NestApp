@@ -23,7 +23,62 @@ export * from './enums';
  */
 export type User = Prisma.UserModel
 /**
+ * Model Workspace
+ * 
+ */
+export type Workspace = Prisma.WorkspaceModel
+/**
+ * Model WorkspaceMember
+ * 
+ */
+export type WorkspaceMember = Prisma.WorkspaceMemberModel
+/**
+ * Model Project
+ * 
+ */
+export type Project = Prisma.ProjectModel
+/**
+ * Model ProjectMember
+ * 
+ */
+export type ProjectMember = Prisma.ProjectMemberModel
+/**
+ * Model Board
+ * 
+ */
+export type Board = Prisma.BoardModel
+/**
+ * Model Column
+ * 
+ */
+export type Column = Prisma.ColumnModel
+/**
  * Model Task
  * 
  */
 export type Task = Prisma.TaskModel
+/**
+ * Model TaskAssignee
+ * 
+ */
+export type TaskAssignee = Prisma.TaskAssigneeModel
+/**
+ * Model Label
+ * 
+ */
+export type Label = Prisma.LabelModel
+/**
+ * Model TaskLabel
+ * 
+ */
+export type TaskLabel = Prisma.TaskLabelModel
+/**
+ * Model Comment
+ * 
+ */
+export type Comment = Prisma.CommentModel
+/**
+ * Model Attachment
+ * 
+ */
+export type Attachment = Prisma.AttachmentModel

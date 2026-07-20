@@ -8,21 +8,225 @@ datasource db {
   provider = "postgresql"
 }
 
+// ─── Users ───────────────────────────────────────────────────────────────────
+
 model User {
   id        String   @id @default(uuid())
   name      String
   email     String   @unique
   password  String
+  avatarUrl String?
   createdAt DateTime @default(now())
-  tasks     Task[]
+  updatedAt DateTime @updatedAt
+
+  workspaces    WorkspaceMember[]
+  projects      ProjectMember[]
+  reportedTasks Task[]            @relation("ReportedTasks")
+  assignedTasks TaskAssignee[]
+  comments      Comment[]
+  attachments   Attachment[]
 }
 
-model Task {
+// ─── Workspaces ──────────────────────────────────────────────────────────────
+
+model Workspace {
   id        String   @id @default(uuid())
-  title     String
-  completed Boolean  @default(false)
+  name      String
+  slug      String   @unique
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  members  WorkspaceMember[]
+  projects Project[]
+}
+
+model WorkspaceMember {
+  id       String        @id @default(uuid())
+  role     WorkspaceRole @default(MEMBER)
+  joinedAt DateTime      @default(now())
+
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   userId String
-  user   User   @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, userId])
+}
+
+enum WorkspaceRole {
+  OWNER
+  ADMIN
+  MEMBER
+  GUEST
+}
+
+// ─── Projects ────────────────────────────────────────────────────────────────
+
+model Project {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  key         String // short prefix, e.g. "WEB" → WEB-1, WEB-2
+  color       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  members ProjectMember[]
+  boards  Board[]
+  labels  Label[]
+
+  @@unique([workspaceId, key])
+}
+
+model ProjectMember {
+  id   String      @id @default(uuid())
+  role ProjectRole @default(MEMBER)
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, userId])
+}
+
+enum ProjectRole {
+  ADMIN
+  MEMBER
+  VIEWER
+}
+
+// ─── Boards & Columns ────────────────────────────────────────────────────────
+
+model Board {
+  id        String   @id @default(uuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  columns Column[]
+}
+
+model Column {
+  id       String @id @default(uuid())
+  name     String
+  position Int
+
+  boardId String
+  board   Board  @relation(fields: [boardId], references: [id], onDelete: Cascade)
+
+  tasks Task[]
+}
+
+// ─── Tasks ───────────────────────────────────────────────────────────────────
+
+model Task {
+  id          String    @id @default(uuid())
+  title       String
+  description String?
+  position    Int
+  priority    Priority  @default(NONE)
+  dueDate     DateTime?
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  columnId String
+  column   Column @relation(fields: [columnId], references: [id], onDelete: Cascade)
+
+  reporterId String
+  reporter   User   @relation("ReportedTasks", fields: [reporterId], references: [id])
+
+  // Subtasks
+  parentId String?
+  parent   Task?   @relation("SubTasks", fields: [parentId], references: [id])
+  subtasks Task[]  @relation("SubTasks")
+
+  assignees   TaskAssignee[]
+  labels      TaskLabel[]
+  comments    Comment[]
+  attachments Attachment[]
+}
+
+enum Priority {
+  NONE
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+model TaskAssignee {
+  taskId String
+  task   Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([taskId, userId])
+}
+
+// ─── Labels ──────────────────────────────────────────────────────────────────
+
+model Label {
+  id    String @id @default(uuid())
+  name  String
+  color String
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  tasks TaskLabel[]
+
+  @@unique([projectId, name])
+}
+
+model TaskLabel {
+  taskId String
+  task   Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  labelId String
+  label   Label  @relation(fields: [labelId], references: [id], onDelete: Cascade)
+
+  @@id([taskId, labelId])
+}
+
+// ─── Comments ────────────────────────────────────────────────────────────────
+
+model Comment {
+  id        String   @id @default(uuid())
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  taskId String
+  task   Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id])
+}
+
+// ─── Attachments ─────────────────────────────────────────────────────────────
+
+model Attachment {
+  id        String   @id @default(uuid())
+  filename  String
+  url       String
+  size      Int
+  mimeType  String
+  createdAt DateTime @default(now())
+
+  taskId String
+  task   Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  uploaderId String
+  uploader   User   @relation(fields: [uploaderId], references: [id])
 }

@@ -9,5 +9,16 @@
  * 🟢 You can import this file directly.
  */
 export type * from './models/User'
+export type * from './models/Workspace'
+export type * from './models/WorkspaceMember'
+export type * from './models/Project'
+export type * from './models/ProjectMember'
+export type * from './models/Board'
+export type * from './models/Column'
 export type * from './models/Task'
+export type * from './models/TaskAssignee'
+export type * from './models/Label'
+export type * from './models/TaskLabel'
+export type * from './models/Comment'
+export type * from './models/Attachment'
 export type * from './commonInputTypes'
