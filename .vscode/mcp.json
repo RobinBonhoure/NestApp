@@ -1,0 +1,14 @@
+{
+  "servers": {
+    "context7": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@latest"]
+    },
+    "nextjs-mcp": {
+      "url": "http://localhost:3000/_next/mcp",
+      "type": "http"
+    }
+  },
+  "inputs": []
+}
